@@ -4,6 +4,23 @@ Code related to the investment section of the website.
 
 See [market_sim](market_sim/README.md) for more details on the market simulation framework
 
+### Blockchain consensus (Rust)
+
+Concepts from *Foundations of Distributed Consensus and Blockchains* (Elaine Shi) are implemented in **Rust** under [`blockchain_consensus_rust/`](blockchain_consensus_rust/):
+
+- **Nakamoto-style blockchain** (Ch 6, 14): hash-linked blocks, longest-chain rule.
+- **Dolev-Strong Byzantine Broadcast** (Ch 3): f+1 rounds, consistency and validity.
+
+```bash
+cd blockchain_consensus_rust && cargo build && cargo test
+cargo run          # chain growth demo (JSON)
+cargo run -- dolev # Dolev-Strong demo
+```
+
+**Use consensus in a scenario:** pass `consensus='rust'` to `create_market_making_scenario(...)`; results will include `results['consensus']` with chain data. Default is no consensus.
+
+See [blockchain_consensus_rust/README.md](blockchain_consensus_rust/README.md) for details.
+
 ## Instructions (test)
 
 1. Read this readme and all the docs.

@@ -30,20 +30,23 @@ class MarketSimulation:
     def __init__(self, 
                  start_time: datetime,
                  end_time: datetime,
-                 time_step: timedelta = timedelta(milliseconds=100)):
+                 time_step: timedelta = timedelta(milliseconds=100),
+                 consensus_engine: Optional[Any] = None):
         self.start_time = start_time
         self.end_time = end_time
         self.time_step = time_step
         self.current_time = start_time
-        
+        self.consensus_engine = consensus_engine
+        self._consensus_state: Optional[Dict[str, Any]] = None
+
         # Components
         self.exchanges: Dict[str, MatchingEngine] = {}
         self.agents: Dict[str, BaseAgent] = {}
         self.assets: Dict[str, Asset] = {}
-        
+
         # Event queue
         self.event_queue = []
-        
+
         # Results collection
         self.trades: List[Trade] = []
         self.metrics: Dict[str, List[Dict]] = {
@@ -51,7 +54,7 @@ class MarketSimulation:
             'agent_metrics': [],
             'market_metrics': []
         }
-        
+
         # Setup logging
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -145,11 +148,16 @@ class MarketSimulation:
                     'bid_volume': sum(qty for _, qty in bids),
                     'ask_volume': sum(qty for _, qty in asks)
                 })
-    
+
     def run(self) -> Dict[str, Any]:
         """Run the simulation."""
         self.logger.info(f"Starting simulation from {self.start_time} to {self.end_time}")
-        
+
+        if self.consensus_engine is not None:
+            num_rounds = min(20, max(1, int((self.end_time - self.start_time) / self.time_step)))
+            self.logger.info(f"Running consensus backend ({self.consensus_engine.name()}) for {num_rounds} rounds")
+            self._consensus_state = self.consensus_engine.run_consensus(num_rounds)
+
         while self.current_time <= self.end_time:
             # Process scheduled events
             while self.event_queue and self.event_queue[0].timestamp <= self.current_time:
@@ -203,7 +211,7 @@ class MarketSimulation:
     
     def _get_simulation_results(self) -> Dict[str, Any]:
         """Compile and return simulation results."""
-        return {
+        out = {
             'start_time': self.start_time,
             'end_time': self.end_time,
             'trades': self.trades,
@@ -215,3 +223,6 @@ class MarketSimulation:
                 }
             }
         } 
+        if self._consensus_state is not None:
+            out['consensus'] = self._consensus_state
+        return out 

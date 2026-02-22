@@ -1,0 +1,18 @@
+[package]
+name = "blockchain_consensus"
+version = "0.1.0"
+edition = "2021"
+description = "Blockchain consensus (Nakamoto + Dolev-Strong) from Foundations of Distributed Consensus and Blockchains"
+authors = ["Torbellino Tech"]
+license = "MIT"
+
+[dependencies]
+sha2 = "0.10"
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = "0.4"
+
+[[bin]]
+name = "blockchain_consensus"
+path = "src/main.rs"

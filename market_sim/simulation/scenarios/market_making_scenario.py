@@ -19,6 +19,11 @@ from strategies.hft.market_maker import MarketMaker
 from simulation.engine.simulation_engine import MarketSimulation
 from core.utils.time_utils import utc_now
 
+try:
+    from blockchain.consensus.engine import get_engine
+except ImportError:
+    get_engine = None
+
 class RandomTrader(BaseAgent):
     """Simple trader that randomly places market orders."""
     def __init__(self, agent_id: str, initial_balance: Decimal,
@@ -71,21 +76,24 @@ def create_market_making_scenario(
     duration: timedelta = timedelta(hours=1),
     symbols: List[str] = None,
     num_random_traders: int = 10,
-    include_market_events: bool = True
+    include_market_events: bool = True,
+    consensus: str = 'none'
 ) -> MarketSimulation:
-    """Create a market making scenario."""
-    
-    # Set default values
+    """Create a market making scenario. consensus='none' (default) or 'rust' to use Rust consensus backend."""
     if start_time is None:
         start_time = utc_now()
     if symbols is None:
         symbols = ['AAPL', 'MSFT', 'GOOGL']
-    
-    # Create simulation
+
+    consensus_engine = None
+    if get_engine is not None and consensus == 'rust':
+        consensus_engine = get_engine('rust')
+
     sim = MarketSimulation(
         start_time=start_time,
         end_time=start_time + duration,
-        time_step=timedelta(milliseconds=100)
+        time_step=timedelta(milliseconds=100),
+        consensus_engine=consensus_engine
     )
     
     # Add assets

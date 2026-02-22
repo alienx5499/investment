@@ -7,13 +7,11 @@ from simulation.scenarios.market_making_scenario import create_market_making_sce
 from core.utils.time_utils import utc_now
 
 def test_market_making_scenario():
-    """Test basic market making scenario execution."""
-    # Setup
+    """Test basic market making scenario execution (default: no consensus backend)."""
     start_time = utc_now()
-    duration = timedelta(minutes=5)  # Shorter duration for tests
+    duration = timedelta(minutes=5)
     symbols = ['AAPL', 'MSFT', 'GOOGL']
-    
-    # Create and run simulation
+
     sim = create_market_making_scenario(
         start_time=start_time,
         duration=duration,
@@ -61,7 +59,8 @@ def test_market_making_scenario():
             
     # Verify market events were processed
     market_events = [
-        e for e in sim.event_queue 
+        e for e in sim.event_queue
         if e.event_type == 'market_event'
     ]
-    assert len(market_events) > 0, "No market events were scheduled" 
+    assert len(market_events) > 0, "No market events were scheduled"
+
